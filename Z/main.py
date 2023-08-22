@@ -1,7 +1,8 @@
-from pyautogui import moveTo, leftClick, rightClick, doubleClick, press, hotkey
-from bars import lf_template,change_row,wait_bars
+
+from bars import lf_template,change_row,wait_bars, write_text, press_key, hot_key, leftClick, rightClick, doubleClick
 from threading import Thread
 from time import sleep
+
 
 distance = 0
 sleep(3)
@@ -10,7 +11,7 @@ def fix_error():
     count = 0
     while True:
         if lf_template('error'):
-            press('enter')
+            press_key('enter')
             count += 1
             print(f'Недействующий характер заболевания: {count}')
 
@@ -20,9 +21,9 @@ th.start()
 while True:
     for i in range(12):
         if lf_template('start_1') and lf_template('start_2'):
-            moveTo(55,446 + distance)
+            leftClick(55,446 + distance)
             distance += 30
-            leftClick()
+
             wait_bars('wait_1')
 
             if lf_template('pos'):
@@ -35,19 +36,16 @@ while True:
                 change_row((692,494),1)
                 wait_bars('wait_1')
                 if lf_template('result_1') and lf_template('result_2'):
-                    press('pagedown')
+                    press_key('pagedown')
                     wait_bars('wait_1')
-                    moveTo(lf_template('save'))
-                    leftClick()
+                    leftClick(lf_template('save'))
                     wait_bars('wait_1')
-                    leftClick()
                     wait_bars('wait_1')
 
-        press('esc')
+        press_key('esc')
         wait_bars('wait_1')               
     
     if lf_template('ok'):
-        moveTo(lf_template('ok'))
-        leftClick()
+        leftClick(lf_template('ok'))
         distance = 0
         wait_bars('wait_1')  

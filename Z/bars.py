@@ -1,10 +1,73 @@
 import cv2 as cv
 import numpy as np
 import time
-import pyautogui
 from PIL import ImageGrab
-#Для проверки шаблона внесите в аргумент test искомый шаблон и запустите данный файл
-#Все шаблоны должны быть в формате .bmp
+import win32api, win32con
+import pyperclip
+
+def leftClick(*cord):
+    if len(cord) == 1:
+        cord = cord[0] 
+    x,y = cord 
+    win32api.SetCursorPos((x,y))
+    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,x,y,0,0)
+    time.sleep(0.003)
+    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,x,y,0,0)
+
+def rightClick(*cord):
+    if len(cord) == 1:
+        cord = cord[0] 
+    x,y = cord 
+    win32api.SetCursorPos((x,y))
+    win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTUP,x,y,0,0)
+    time.sleep(0.003)
+    win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTDOWN,x,y,0,0)
+
+
+def doubleClick(*cord):
+    if len(cord) == 1:
+        cord = cord[0] 
+    x,y = cord
+    for i in range(2):
+        win32api.SetCursorPos((x,y))
+        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,x,y,0,0)
+        time.sleep(0.003)
+        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,x,y,0,0)
+
+
+keys = {'CTRL':0x11, 'ENTER':0x0D, 'PAGEUP':0x21,
+        'PAGEDOWN':0x22, 'ESC':0x1B , 'BACKSPACE':0x08, 'SPACE':0x20, 'SHIFT':0x10}
+
+def find_key(key : str):
+    key = key.upper()
+    if key in keys:
+        key = keys.get(key)
+    else: key = ord(key)
+    return key
+
+def press_key(key : str):
+
+    key = find_key(key)
+    win32api.keybd_event(key, 0,0,0)
+    time.sleep(.05)   
+    win32api.keybd_event(key,0 ,win32con.KEYEVENTF_KEYUP ,0)
+
+def hot_key(key_1 : str, key_2 : str):
+    key_1 = find_key(key_1)
+    key_2 = find_key(key_2)
+    win32api.keybd_event(key_1, 0,0,0)
+    time.sleep(.05)
+    win32api.keybd_event(key_2, 0,0,0)
+    time.sleep(.05)
+
+    win32api.keybd_event(key_1,0 ,win32con.KEYEVENTF_KEYUP ,0)
+    win32api.keybd_event(key_2,0 ,win32con.KEYEVENTF_KEYUP ,0)
+
+
+def write_text(text : str):
+    pyperclip.copy(text)
+    hot_key('ctrl', 'v')
+
 test = r'test'
 
 def lf_template(temp):
@@ -53,14 +116,13 @@ def wait_bars(temp):
 
         else: break
 
-def change_row(cord,write_text):
-    pyautogui.moveTo(cord)
-    pyautogui.leftClick()
-    pyautogui.hotkey('ctrlleft','a')
-    pyautogui.write(f'{write_text}')
+def change_row(cord,text):
+    leftClick(cord)
+    hot_key('ctrl','a')
+    write_text(f'{text}')
     time.sleep(1)
     wait_bars('wait_1')
-    pyautogui.press('enter')
+    press_key('enter')
     wait_bars('wait_1')
 
     
