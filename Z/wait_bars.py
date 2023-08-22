@@ -4,6 +4,7 @@ import time
 from PIL import ImageGrab
 
 def wait_bars(temp):
+    temp = f'{temp}.bmp'
     while True:
         time.sleep(1)
         img_rgb = ImageGrab.grab()

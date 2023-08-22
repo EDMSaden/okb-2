@@ -7,6 +7,6 @@ def change_row(cord,write_text):
     pyautogui.hotkey('ctrlleft','a')
     pyautogui.write(f'{write_text}')
     time.sleep(1)
-    wait_bars('wait_1.bmp')
+    wait_bars('wait_1')
     pyautogui.press('enter')
-    wait_bars('wait_1.bmp')
+    wait_bars('wait_1')
