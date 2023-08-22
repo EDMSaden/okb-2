@@ -1,11 +1,22 @@
 from pyautogui import moveTo, leftClick, rightClick, doubleClick, press, hotkey
-from wait_bars import wait_bars
-from lf_template import lf_template
-from chang_row import change_row
+from bars import lf_template,change_row,wait_bars
+from threading import Thread
 from time import sleep
 
-sleep(3)
 distance = 0
+sleep(3)
+
+def fix_error():
+    count = 0
+    while True:
+        if lf_template('error'):
+            press('enter')
+            count += 1
+            print(f'Недействующий характер заболевания: {count}')
+
+th = Thread(target=fix_error, args=())
+th.start()
+
 while True:
     for i in range(12):
         if lf_template('start_1') and lf_template('start_2'):

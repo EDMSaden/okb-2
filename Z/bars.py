@@ -1,5 +1,7 @@
 import cv2 as cv
 import numpy as np
+import time
+import pyautogui
 from PIL import ImageGrab
 #Для проверки шаблона внесите в аргумент test искомый шаблон и запустите данный файл
 #Все шаблоны должны быть в формате .bmp
@@ -31,6 +33,35 @@ def lf_template(temp):
         cv.imshow('result', img_rgb)
         cv.waitKey(0)
 
+def wait_bars(temp):
+    temp = f'{temp}.bmp'
+    while True:
+        time.sleep(1)
+        img_rgb = ImageGrab.grab()
+        img_rgb = np.array(img_rgb)
+        img_gray = cv.cvtColor(img_rgb, cv.COLOR_BGR2GRAY)
+
+        template = cv.imread(temp, cv.IMREAD_GRAYSCALE)
+        w,h = template.shape[::-1]
+        res = cv.matchTemplate(img_gray, template, cv.TM_CCOEFF_NORMED)
+        threshold = 0.8
+
+        loc = np.where(res >= threshold)
+        for pt in zip(*loc[::-1]):
+            time.sleep(1)
+            break
+
+        else: break
+
+def change_row(cord,write_text):
+    pyautogui.moveTo(cord)
+    pyautogui.leftClick()
+    pyautogui.hotkey('ctrlleft','a')
+    pyautogui.write(f'{write_text}')
+    time.sleep(1)
+    wait_bars('wait_1')
+    pyautogui.press('enter')
+    wait_bars('wait_1')
 
     
 if __name__ == '__main__':
