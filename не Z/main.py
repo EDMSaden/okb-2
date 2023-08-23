@@ -36,6 +36,7 @@ for i in range(1,193):
                 press_key('pagedown')
                 leftClickOn('save')
                 leftClickOn('save')
+                print(i)
     press_key('esc')
 
             

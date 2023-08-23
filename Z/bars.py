@@ -4,6 +4,7 @@ import time
 import win32api, win32con
 import pyperclip
 import openpyxl
+import datetime
 from PIL import ImageGrab
 from threading import Thread
 
@@ -118,6 +119,8 @@ def hot_key(key_1 : str, key_2 : str):
     win32api.keybd_event(key_1,0 ,win32con.KEYEVENTF_KEYUP ,0)
     win32api.keybd_event(key_2,0 ,win32con.KEYEVENTF_KEYUP ,0)
     wait_bars('wait_1')
+    if key_1 == 0x11 and key_2 == ord('C'):
+        return pyperclip.paste()
 
 
 def write_text(text : str):
@@ -140,8 +143,17 @@ class Exel:
         self.workbook = openpyxl.load_workbook(path)
         self.work_list = self.workbook.active 
     def cell_value(self, row, colum):
-        cell_number = self.work_list.cell(row = row, column = colum).value
-        print(cell_number)
+        cell_value = self.work_list.cell(row = row, column = colum).value
+        if type(cell_value) is datetime.datetime:
+            data = self.work_list.cell(row = row, column = colum).value
+            day = f'0{data.day}' if data.day < 10 else data.day
+            month = f'0{data.month}' if data.month < 10 else data.month
+            year = data.year
+            return f'{day}.{month}.{year}'
+        return cell_value
+
+
+        
 
 if __name__ == '__main__':
     while True:
