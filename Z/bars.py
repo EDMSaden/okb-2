@@ -4,6 +4,7 @@ import time
 from PIL import ImageGrab
 import win32api, win32con
 import pyperclip
+from threading import Thread
 
 test = r'test'
 
@@ -128,7 +129,10 @@ def change_row(x,y,text):
     write_text(f'{text}')
     press_key('enter')
 
-    
+def start_program(program):
+    th = Thread(target=program, args=())
+    th.start()
+
 if __name__ == '__main__':
     while True:
         img_on_the_screen(test)
