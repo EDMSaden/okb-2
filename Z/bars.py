@@ -8,9 +8,8 @@ import datetime
 from PIL import ImageGrab
 from threading import Thread
 
-test = r'test'
-
 def img_on_the_screen(temp):
+    """Ищет изображение на экране, в качестве аргумента принемает 'название файла' в формате .bmp"""
     temp = f'{temp}.bmp'
     img_rgb = ImageGrab.grab()
     img_rgb = np.array(img_rgb)
@@ -18,7 +17,9 @@ def img_on_the_screen(temp):
     img_gray = cv.cvtColor(img_rgb, cv.COLOR_BGR2GRAY)
 
     template = cv.imread(temp, cv.IMREAD_GRAYSCALE)
+    assert template is not None, f"{temp} не найден, проверти наличие и формат, должен быть .bmp"
     w,h = template.shape[::-1]
+    
     res = cv.matchTemplate(img_gray, template, cv.TM_CCOEFF_NORMED)
     threshold = 0.8
 
@@ -45,6 +46,7 @@ def wait_bars(temp):
         img_gray = cv.cvtColor(img_rgb, cv.COLOR_BGR2GRAY)
 
         template = cv.imread(temp, cv.IMREAD_GRAYSCALE)
+        assert img_rgb is not None, f"{template} не найден, проверьте наличие и формат (.bmp)"
         w,h = template.shape[::-1]
         res = cv.matchTemplate(img_gray, template, cv.TM_CCOEFF_NORMED)
         threshold = 0.8
@@ -57,10 +59,15 @@ def wait_bars(temp):
         else: break
 
 def leftClickOn(*cord):
+    """Принимает два обязательных аргумента (x,y) или один ('название изображения') в формате .bmp"""
     if type(cord[0]) is str:
+        name = cord
         cord = img_on_the_screen(cord[0])
+        if cord == None:
+            return print(f'{name[0]} не найден')
     elif len(cord) == 1:
-        cord = cord[0] 
+        cord = cord[0]
+
     x,y = cord 
     win32api.SetCursorPos((x,y))
     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,x,y,0,0)
@@ -69,8 +76,15 @@ def leftClickOn(*cord):
     wait_bars('wait_1')
 
 def rightClickOn(*cord):
-    if len(cord) == 1:
-        cord = cord[0] 
+    """Принимает два обязательных аргумента (x,y) или один ('название изображения') в формате .bmp"""
+    if type(cord[0]) is str:
+        name = cord
+        cord = img_on_the_screen(cord[0])
+        if cord == None:
+            return print(f'{name[0]} не найден')
+    elif len(cord) == 1:
+        cord = cord[0]
+
     x,y = cord 
     win32api.SetCursorPos((x,y))
     win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTUP,x,y,0,0)
@@ -80,8 +94,15 @@ def rightClickOn(*cord):
 
 
 def doubleClickOn(*cord):
-    if len(cord) == 1:
-        cord = cord[0] 
+    """Принимает два обязательных аргумента (x,y) или один ('название изображения') в формате .bmp"""
+    if type(cord[0]) is str:
+        name = cord
+        cord = img_on_the_screen(cord[0])
+        if cord == None:
+            return print(f'{name[0]} не найден')
+    elif len(cord) == 1:
+        cord = cord[0]
+
     x,y = cord
     for i in range(2):
         win32api.SetCursorPos((x,y))
@@ -92,7 +113,7 @@ def doubleClickOn(*cord):
 
 
 keys = {'CTRL':0x11, 'ENTER':0x0D, 'PAGEUP':0x21,
-        'PAGEDOWN':0x22, 'ESC':0x1B , 'BACKSPACE':0x08, 'SPACE':0x20, 'SHIFT':0x10}
+        'PAGEDOWN':0x22, 'ESC':0x1B , 'BACKSPACE':0x08, 'SPACE':0x20, 'SHIFT':0x10, 'DELETE':0x2E}
 
 def find_key(key : str):
     key = key.upper()
@@ -102,6 +123,8 @@ def find_key(key : str):
     return key
 
 def press_key(key : str):
+    """В качестве аргумента принимает любую кнопку на англ.языке ('q') или зарезервированное слово ('delete').
+    Список зарезервированных слов : ctrl, enter, pageup,pagedown, esc, backspace, space, shift, delete"""
     key = find_key(key)
     win32api.keybd_event(key, 0,0,0)
     time.sleep(.05)   
@@ -109,6 +132,9 @@ def press_key(key : str):
     wait_bars('wait_1')
 
 def hot_key(key_1 : str, key_2 : str):
+    """Принимает два обязательных аргумента ('ctrl','a'), каждый из которых  может быть англ.буквой или зарезервированным словом
+    Список зарезервированных слов : ctrl, enter, pageup,pagedown, esc, backspace, space, shift, delete.
+    ⭐️Если комбинация клавиш ('ctrl' , 'c'), то возвращает значение"""
     key_1 = find_key(key_1)
     key_2 = find_key(key_2)
     win32api.keybd_event(key_1, 0,0,0)
@@ -124,25 +150,30 @@ def hot_key(key_1 : str, key_2 : str):
 
 
 def write_text(text : str):
+    """В качестве аргумента принимает ('любой текст')"""
     pyperclip.copy(text)
     hot_key('ctrl', 'v')
 
 def change_row(x,y,text):
+    """Принимает три обязательных аргумента (x, y,'любой текст')"""
     leftClickOn(x,y)
     hot_key('ctrl','a')
     write_text(f'{text}')
     press_key('enter')
 
 def start_program(program):
+    '''Запускает программу, принимает 'функцию def' как аргумент'''
     th = Thread(target=program, args=())
     th.start()
 
 class Exel:
     def __init__(self, path):
-        self.path = path
+        """В качестве аргумента принимает ('название файла') в формате .xlsx"""
+        self.path = f'{path}.xlsx'
         self.workbook = openpyxl.load_workbook(path)
         self.work_list = self.workbook.active 
     def cell_value(self, row, colum):
+        """Принимает два обязательных аргумента (поле, строка) и возвращает значение"""
         cell_value = self.work_list.cell(row = row, column = colum).value
         if type(cell_value) is datetime.datetime:
             data = self.work_list.cell(row = row, column = colum).value
@@ -151,10 +182,3 @@ class Exel:
             year = data.year
             return f'{day}.{month}.{year}'
         return cell_value
-
-
-        
-
-if __name__ == '__main__':
-    while True:
-        img_on_the_screen(test)
