@@ -1,4 +1,0 @@
-chang_row - замена поля
-lf_point - поиск координат
-lf_template - поиск шаблона
-wait_bars - ожидание барса

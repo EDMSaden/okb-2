@@ -1,52 +1,43 @@
+
 from bars import img_on_the_screen,change_row, write_text, press_key, hot_key, leftClickOn, rightClickOn, doubleClickOn, start_program, Exel
-from time import sleep
 
-exel = Exel(r'Ошибки_neZ')
+def program_1():
+    while True:
+        if img_on_the_screen('error'):
+            press_key('enter')
 
-for i in range(1,193):
-    if img_on_the_screen('start'):
-        # № талона
-        leftClickOn(331,228)
-        hot_key('ctrl', 'a')
-        write_text(exel.cell_value(i,1))
-        # Дата с
-        leftClickOn(926,253)
-        hot_key('ctrl', 'a')
-        write_text(exel.cell_value(i,7))
-        # Дата по
-        leftClickOn(938,275)
-        hot_key('ctrl', 'a')
-        write_text(exel.cell_value(i,7))
+def program_2():
+    distance = 0
+    while True:
+        for i in range(12):
+            if img_on_the_screen('z1') and img_on_the_screen('purp1'):
+                leftClickOn(31,450 + distance)
+                distance += 33
+                while True:
+                    if img_on_the_screen('scrp1'):
+                        #Цель
+                        change_row(984,249,'профосмотр')
+                        change_row(1007,268,'2 - Профилактическое')
+                        change_row(739,471,'Осмотр')
+                        change_row(697,495,'Лечение завершено')
+                        if img_on_the_screen('rslt1') and img_on_the_screen('rslt2'):
+                            press_key('pagedown')
+                            leftClickOn('save')
+                            leftClickOn('save')
+                            if img_on_the_screen('purp2'):
+                                leftClickOn('purp2')
+                                press_key('pageup')
+                            else:
+                                press_key('pageup')
+                                leftClickOn(648,171)
+                                leftClickOn(858,778)
+                                hot_key('ctrl', 'a')
+                                press_key('backspace')
+                                leftClickOn(1326,1006)
+                                press_key('esc')
+                                break
+            distance = 0
+            leftClickOn('ok')
 
-        press_key('enter')
-        # Врач
-        doubleClickOn(713,449)
-        #Строка ниже нажимает ctrl + c и сверяет результат копирования со строкой из Exel
-        if hot_key('ctrl', 'c') in exel.cell_value(i,5):
-            leftClickOn(64,447)
-            # Цель 
-            change_row(965,247, '1')
-            # Вид 
-            change_row(971,271, '1')
-            # Исход
-            change_row(698,473, '3')
-            # Результат 
-            change_row(688,495, '1')
-            if img_on_the_screen('res_1') and img_on_the_screen('res_2'):
-                press_key('pagedown')
-                leftClickOn('save')
-                leftClickOn('save')
-                print(i)
-    press_key('esc')
-
-            
-    
-
-
-          
-
-
-
-
-
-
+start_program(program_1)
+start_program(program_2)

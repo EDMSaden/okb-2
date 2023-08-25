@@ -17,14 +17,14 @@ def stop_programs():
             os.system("TASKKILL /F /IM PYTHON.EXE")
 
 def start_program(program):
-    '''Запускает программу в бесконечном цикле, принимает 'функцию def' как аргумент'''
+    '''Запускает программу, принимает ('функцию def') как аргумент'''
     programs.add(program.__name__)
     exec(f'{program.__name__} = Thread(target=program, args=())')
     exec(f'{program.__name__}.start()')
     print(f'start {program.__name__}')
 
 def img_on_the_screen(temp):
-    """Ищет изображение на экране, в качестве аргумента принемает 'название файла' в формате .bmp"""
+    """Ищет изображение на экране, в качестве аргумента принемает ('название файла') в формате .bmp"""
     temp = f'{temp}.bmp'
     img_rgb = ImageGrab.grab()
     img_rgb = np.array(img_rgb)
@@ -177,8 +177,8 @@ def change_row(x,y,text):
     press_key('enter')
 
 class Exel:
+    """В качестве аргумента принимает ('название файла') в формате .xlsx"""
     def __init__(self, path):
-        """В качестве аргумента принимает ('название файла') в формате .xlsx"""
         self.path = path
         self.workbook = openpyxl.load_workbook(f'{path}.xlsx')
         self.work_list = self.workbook.active 
