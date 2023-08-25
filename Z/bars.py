@@ -5,8 +5,23 @@ import win32api, win32con
 import pyperclip
 import openpyxl
 import datetime
+import os
 from PIL import ImageGrab
 from threading import Thread
+#F10 - выключить все
+#F2 - получить x,y
+programs = set()
+def stop_programs():
+    while True:
+        if win32api.GetKeyState(0x79) < 0:
+            os.system("TASKKILL /F /IM PYTHON.EXE")
+
+def start_program(program):
+    '''Запускает программу в бесконечном цикле, принимает 'функцию def' как аргумент'''
+    programs.add(program.__name__)
+    exec(f'{program.__name__} = Thread(target=program, args=())')
+    exec(f'{program.__name__}.start()')
+    print(f'start {program.__name__}')
 
 def img_on_the_screen(temp):
     """Ищет изображение на экране, в качестве аргумента принемает 'название файла' в формате .bmp"""
@@ -161,16 +176,11 @@ def change_row(x,y,text):
     write_text(f'{text}')
     press_key('enter')
 
-def start_program(program):
-    '''Запускает программу, принимает 'функцию def' как аргумент'''
-    th = Thread(target=program, args=())
-    th.start()
-
 class Exel:
     def __init__(self, path):
         """В качестве аргумента принимает ('название файла') в формате .xlsx"""
-        self.path = f'{path}.xlsx'
-        self.workbook = openpyxl.load_workbook(path)
+        self.path = path
+        self.workbook = openpyxl.load_workbook(f'{path}.xlsx')
         self.work_list = self.workbook.active 
     def cell_value(self, row, colum):
         """Принимает два обязательных аргумента (поле, строка) и возвращает значение"""
@@ -182,3 +192,15 @@ class Exel:
             year = data.year
             return f'{day}.{month}.{year}'
         return cell_value
+    
+if __name__ != '__main__':
+    th_stop_fc = Thread(target=stop_programs, args=())
+    th_stop_fc.start()
+
+if __name__ == '__main__':
+    while True:
+        if win32api.GetKeyState(0x71) < 0:
+            print(f'{win32api.GetCursorPos()[0]}, {win32api.GetCursorPos()[1]}')
+            pyperclip.copy(f'{win32api.GetCursorPos()[0]}, {win32api.GetCursorPos()[1]}')
+            time.sleep(.5)
+

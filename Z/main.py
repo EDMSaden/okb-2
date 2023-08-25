@@ -1,12 +1,10 @@
 
-from bars import img_on_the_screen,change_row, write_text, press_key, hot_key, leftClickOn, rightClickOn, doubleClickOn, start_program
-
+from bars import img_on_the_screen,change_row, write_text, press_key, hot_key, leftClickOn, rightClickOn, doubleClickOn, start_program, Exel
 
 def program_1():
     while True:
         if img_on_the_screen('error'):
             press_key('enter')
-
 
 def program_2():
     distance = 0
@@ -38,8 +36,8 @@ def program_2():
                                 leftClickOn(1326,1006)
                                 press_key('esc')
                                 break
-        distance = 0
-        leftClickOn('ok')
+            distance = 0
+            leftClickOn('ok')
 
 start_program(program_1)
 start_program(program_2)

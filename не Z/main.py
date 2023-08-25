@@ -1,7 +1,7 @@
 from bars import img_on_the_screen,change_row, write_text, press_key, hot_key, leftClickOn, rightClickOn, doubleClickOn, start_program, Exel
 from time import sleep
 
-exel = Exel(r'Ошибки_neZ.xlsx')
+exel = Exel(r'Ошибки_neZ')
 
 for i in range(1,193):
     if img_on_the_screen('start'):
