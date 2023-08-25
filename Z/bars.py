@@ -8,23 +8,57 @@ import datetime
 import os
 from PIL import ImageGrab
 from threading import Thread
+import requests
+
+TOKEN = "6641272022:AAFlvbJJEdex2kAzzyYGN7AxkDc2F2_tzis"
+chat_id = "1036356107"
+URL = 'https://api.telegram.org/bot'
 #F10 - выключить все
 #F2 - получить x,y
 programs = set()
+
+def get_updates(offset=0):
+    result = requests.get(f'{URL}{TOKEN}/getUpdates?offset={offset}').json()
+    return result['result']
+
+def send_message(text, chat_id=1036356107):
+    requests.get(f'{URL}{TOKEN}/sendMessage?chat_id={chat_id}&text={text}')
+
+def check_message(chat_id, message):
+    for mes in message.lower().replace(',', '').split():
+        print(mes)
+        if mes in ['/stop']:
+            send_message('Выключаю бота)')
+            os.system("TASKKILL /F /IM PYTHON.EXE")
+
+def run_tg():
+    update_id = get_updates()[-1]['update_id'] # Присваиваем ID последнего отправленного сообщения боту
+    while True:
+        time.sleep(2)
+        messages = get_updates(update_id) # Получаем обновления
+        for message in messages:
+            # Если в обновлении есть ID больше чем ID последнего сообщения, значит пришло новое сообщение
+            if update_id < message['update_id']:
+                update_id = message['update_id'] # Присваиваем ID последнего отправленного сообщения боту
+                # Отвечаем тому кто прислал сообщение боту
+                check_message(message['message']['chat']['id'], message['message']['text'])
+
 def stop_programs():
     while True:
         if win32api.GetKeyState(0x79) < 0:
             os.system("TASKKILL /F /IM PYTHON.EXE")
 
 def start_program(program):
-    '''Запускает программу, принимает ('функцию def') как аргумент'''
+    '''Запускает программу в бесконечном цикле, принимает 'функцию def' как аргумент'''
     programs.add(program.__name__)
     exec(f'{program.__name__} = Thread(target=program, args=())')
     exec(f'{program.__name__}.start()')
     print(f'start {program.__name__}')
+    send_message(f'start {program.__name__}')
+
 
 def img_on_the_screen(temp):
-    """Ищет изображение на экране, в качестве аргумента принемает ('название файла') в формате .bmp"""
+    """Ищет изображение на экране, в качестве аргумента принемает 'название файла' в формате .bmp"""
     temp = f'{temp}.bmp'
     img_rgb = ImageGrab.grab()
     img_rgb = np.array(img_rgb)
@@ -32,25 +66,30 @@ def img_on_the_screen(temp):
     img_gray = cv.cvtColor(img_rgb, cv.COLOR_BGR2GRAY)
 
     template = cv.imread(temp, cv.IMREAD_GRAYSCALE)
-    assert template is not None, f"{temp} не найден, проверти наличие и формат, должен быть .bmp"
-    w,h = template.shape[::-1]
-    
-    res = cv.matchTemplate(img_gray, template, cv.TM_CCOEFF_NORMED)
-    threshold = 0.8
-
-    loc = np.where(res >= threshold)
-    for pt in zip(*loc[::-1]):          
-        if __name__ == '__main__':
-            cv.rectangle(img_rgb,pt,(pt[0] + w, pt[1] + h), (0,0,255), 2)
-            print(pt[0] + int(w/2), pt[1] + int(h/2))
-            break
-        else:
-            return pt[0] + int(w/2), pt[1] + int(h/2)
+    if cv.imread(temp, cv.IMREAD_GRAYSCALE) is None:
+        print(f"{temp} не найден, проверти наличие и формат, должен быть .bmp")
+        send_message(f"{temp} не найден, проверти наличие и формат, должен быть .bmp")
+        time.sleep(3)
+        return False
+    else:
+        w,h = template.shape[::-1]
         
-    if __name__ == '__main__':
-        img_rgb = cv.resize(img_rgb, (1024, 768))
-        cv.imshow('result', img_rgb)
-        cv.waitKey(0)
+        res = cv.matchTemplate(img_gray, template, cv.TM_CCOEFF_NORMED)
+        threshold = 0.8
+
+        loc = np.where(res >= threshold)
+        for pt in zip(*loc[::-1]):          
+            if __name__ == '__main__':
+                cv.rectangle(img_rgb,pt,(pt[0] + w, pt[1] + h), (0,0,255), 2)
+                print(pt[0] + int(w/2), pt[1] + int(h/2))
+                break
+            else:
+                return pt[0] + int(w/2), pt[1] + int(h/2)
+            
+        if __name__ == '__main__':
+            img_rgb = cv.resize(img_rgb, (1024, 768))
+            cv.imshow('result', img_rgb)
+            cv.waitKey(0)
 
 def wait_bars(temp):
     temp = f'{temp}.bmp'
@@ -78,7 +117,8 @@ def leftClickOn(*cord):
     if type(cord[0]) is str:
         name = cord
         cord = img_on_the_screen(cord[0])
-        if cord == None:
+        if cord == None or cord == False:
+            send_message(f'{name[0]} не найден')
             return print(f'{name[0]} не найден')
     elif len(cord) == 1:
         cord = cord[0]
@@ -96,6 +136,7 @@ def rightClickOn(*cord):
         name = cord
         cord = img_on_the_screen(cord[0])
         if cord == None:
+            send_message(f'{name[0]} не найден')
             return print(f'{name[0]} не найден')
     elif len(cord) == 1:
         cord = cord[0]
@@ -114,6 +155,7 @@ def doubleClickOn(*cord):
         name = cord
         cord = img_on_the_screen(cord[0])
         if cord == None:
+            send_message(f'{name[0]} не найден')
             return print(f'{name[0]} не найден')
     elif len(cord) == 1:
         cord = cord[0]
@@ -177,8 +219,8 @@ def change_row(x,y,text):
     press_key('enter')
 
 class Exel:
-    """В качестве аргумента принимает ('название файла') в формате .xlsx"""
     def __init__(self, path):
+        """В качестве аргумента принимает ('название файла') в формате .xlsx"""
         self.path = path
         self.workbook = openpyxl.load_workbook(f'{path}.xlsx')
         self.work_list = self.workbook.active 
@@ -197,10 +239,12 @@ if __name__ != '__main__':
     th_stop_fc = Thread(target=stop_programs, args=())
     th_stop_fc.start()
 
+    tg = Thread(target=run_tg, args=())
+    tg.start()
+
 if __name__ == '__main__':
     while True:
         if win32api.GetKeyState(0x71) < 0:
             print(f'{win32api.GetCursorPos()[0]}, {win32api.GetCursorPos()[1]}')
             pyperclip.copy(f'{win32api.GetCursorPos()[0]}, {win32api.GetCursorPos()[1]}')
             time.sleep(.5)
-
