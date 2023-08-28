@@ -11,12 +11,11 @@ from threading import Thread
 import requests
 
 TOKEN = "6641272022:AAFlvbJJEdex2kAzzyYGN7AxkDc2F2_tzis"
-chat_id = "1036356107"
+chat_id = 1036356107
 URL = 'https://api.telegram.org/bot'
 #F10 - выключить все
 #F2 - получить x,y
-programs = set()
-
+programs = []
 def get_updates(offset=0):
     result = requests.get(f'{URL}{TOKEN}/getUpdates?offset={offset}').json()
     return result['result']
@@ -28,20 +27,23 @@ def check_message(chat_id, message):
     for mes in message.lower().replace(',', '').split():
         print(mes)
         if mes in ['/stop']:
-            send_message('Выключаю бота)')
+            send_message(f'Программа завершена')
             os.system("TASKKILL /F /IM PYTHON.EXE")
+            
 
 def run_tg():
-    update_id = get_updates()[-1]['update_id'] # Присваиваем ID последнего отправленного сообщения боту
-    while True:
-        time.sleep(2)
-        messages = get_updates(update_id) # Получаем обновления
-        for message in messages:
-            # Если в обновлении есть ID больше чем ID последнего сообщения, значит пришло новое сообщение
-            if update_id < message['update_id']:
-                update_id = message['update_id'] # Присваиваем ID последнего отправленного сообщения боту
-                # Отвечаем тому кто прислал сообщение боту
-                check_message(message['message']['chat']['id'], message['message']['text'])
+    try:
+        update_id = get_updates()[-1]['update_id'] # Присваиваем ID последнего отправленного сообщения боту
+        while True:
+            time.sleep(2)
+            messages = get_updates(update_id) # Получаем обновления
+            for message in messages:
+                # Если в обновлении есть ID больше чем ID последнего сообщения, значит пришло новое сообщение
+                if update_id < message['update_id']:
+                    update_id = message['update_id'] # Присваиваем ID последнего отправленного сообщения боту
+                    # Отвечаем тому кто прислал сообщение боту
+                    check_message(message['message']['chat']['id'], message['message']['text'])
+    except:pass
 
 def stop_programs():
     while True:
@@ -49,12 +51,12 @@ def stop_programs():
             os.system("TASKKILL /F /IM PYTHON.EXE")
 
 def start_program(program):
-    '''Запускает программу в бесконечном цикле, принимает 'функцию def' как аргумент'''
-    programs.add(program.__name__)
+    '''Запускает программу, принимает 'функцию def' как аргумент'''
     exec(f'{program.__name__} = Thread(target=program, args=())')
     exec(f'{program.__name__}.start()')
-    print(f'start {program.__name__}')
-    send_message(f'start {program.__name__}')
+    programs.append(eval(f'{program.__name__}.native_id'))
+    print(f'процесс запушен {programs[-1]}')
+    send_message(f'процесс запушен {programs[-1]}')
 
 
 def img_on_the_screen(temp):
@@ -241,6 +243,8 @@ if __name__ != '__main__':
 
     tg = Thread(target=run_tg, args=())
     tg.start()
+    
+    send_message(os.getlogin())
 
 if __name__ == '__main__':
     while True:

@@ -1,0 +1,10 @@
+{
+    "name": "Тест",
+    "description": "Пробую жижу",
+    "version": "1.4",
+    "manifest_version": 3,
+    "icons": {},
+    "action": {"default_popup": "popup.html"},
+    "permissions": ["activeTab", "scripting"],
+    "background":{}
+}

@@ -1,0 +1,13 @@
+{
+    "name": "Snow",
+    "version": "0.1",
+    "manifest_version": 3,
+    "permissions": ["activeTab", "scripting"],
+    "content_scripts": [
+    {
+    "matches": ["https://notepad-plus-plus.org/"],
+    "js": ["popup.js"],
+    "run_at": "document_idle"
+    }
+    ]
+    }
